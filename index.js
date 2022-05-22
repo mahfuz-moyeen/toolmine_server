@@ -3,6 +3,7 @@ const cors = require('cors');
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const app = express();
 const port = process.env.PORT || 5000
@@ -36,6 +37,7 @@ async function run() {
         const reviewsCollection = client.db("tool_mine").collection("reviews");
         const userCollection = client.db("tool_mine").collection("users");
         const ordersCollection = client.db("tool_mine").collection("order");
+        const paymentCollection = client.db("tool_mine").collection("payment");
 
         //---- login api ----//
 
@@ -59,6 +61,8 @@ async function run() {
         //--------------------//
 
 
+
+
         //---- user ---//
 
         // all products
@@ -75,6 +79,9 @@ async function run() {
             const product = await productsCollection.findOne(query)
             res.send(product);
         })
+
+
+        /////---------ORDERS API--------/////
 
         // add orders 
         app.post('/order', async (req, res) => {
@@ -105,6 +112,36 @@ async function run() {
             res.send(result)
         })
 
+        // get single order 
+        app.get('/order/:id', verifyToken, async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) }
+            const order = await ordersCollection.findOne(query);
+            res.send(order)
+        })
+
+        // update order and add to payment
+        app.patch('/order/:id', verifyToken, async (req, res) => {
+            const id = req.params.id;
+            const payment = req.body;
+            const filter = { _id: ObjectId(id) };
+            const updatedDoc = {
+                $set: {
+                    paid: true,
+                    transactionId: payment.transactionId
+                }
+            }
+            const result = await paymentCollection.insertOne(payment);
+            const updateOrder = await ordersCollection.updateOne(filter, updatedDoc);
+            res.send(updateOrder);
+        })
+
+        //-------------------//
+
+
+
+        /////---------REVIEWS API--------/////
+
         // add reviews 
         app.post('/review', async (req, res) => {
             const review = req.body;
@@ -127,6 +164,25 @@ async function run() {
 
 
         //------------------//
+
+
+
+
+        //---- payment ----//
+
+        //create payment 
+        app.post('/create-payment-intent', verifyToken, async (req, res) => {
+            const { price } = req.body;
+            const amount = price * 100;
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: amount,
+                currency: 'usd',
+                payment_method_types: ['card']
+            });
+            res.send({ clientSecret: paymentIntent.client_secret })
+        });
+
+        //----------------//
 
     }
     finally {
