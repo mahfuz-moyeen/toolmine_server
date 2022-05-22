@@ -39,6 +39,8 @@ async function run() {
         const ordersCollection = client.db("tool_mine").collection("order");
         const paymentCollection = client.db("tool_mine").collection("payment");
 
+
+
         //---- login api ----//
 
         //add & update  user
@@ -55,6 +57,27 @@ async function run() {
             const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1d' });
 
             res.send({ result, token })
+        })
+
+        // get user by email
+        app.get('/user/:email', verifyToken, async (req, res) => {
+            const email = req.params.email
+            const query = { email: email }
+            console.log(query);
+            const user = await userCollection.find(query).toArray()
+            res.send(user)
+        })
+
+        //update  user
+        app.patch('/user/:email', verifyToken, async (req, res) => {
+            const email = req.params.email;
+            const data = req.body;
+            const filter = { email: email }
+            const updateDoc = {
+                $set: data
+            }
+            const result = await userCollection.updateOne(filter, updateDoc)
+            res.send(result)
         })
 
 
@@ -143,7 +166,7 @@ async function run() {
         /////---------REVIEWS API--------/////
 
         // add reviews 
-        app.post('/review', async (req, res) => {
+        app.post('/review', verifyToken, async (req, res) => {
             const review = req.body;
             const result = await reviewsCollection.insertOne(review);
             res.send(result)
