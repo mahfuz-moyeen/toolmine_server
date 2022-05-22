@@ -15,7 +15,38 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run() {
     try {
         await client.connect();
+        const productsCollection = client.db("tool_mine").collection("products");
         console.log('mongo');
+
+        //---- login api ----//
+
+        //--------------------//
+
+
+        //---- user ---//
+
+        // all products
+        app.get('/products', async (req, res) => {
+            const query = {}
+            const products = await productsCollection.find(query).toArray();
+            res.send(products);
+        })
+
+        // single product
+        app.get('/product/:id', async (req, res) => {
+            const id = req.params.id
+            const query = { _id: ObjectId(id) }
+            const product = await productsCollection.findOne(query)
+            res.send(product);
+        })
+
+        //-------------------//
+
+        //---- admin api ----//
+
+
+        //------------------//
+
     }
     finally {
 
