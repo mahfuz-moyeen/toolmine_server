@@ -38,7 +38,6 @@ async function run() {
             res.send({ result, token })
         })
 
-        
 
         //--------------------//
 
@@ -61,13 +60,22 @@ async function run() {
         })
 
         // add reviews 
-        app.post('/reviews', async (req, res) => {
+        app.post('/review', async (req, res) => {
             const review = req.body;
             const result = await reviewsCollection.insertOne(review);
             res.send(result)
         })
 
+        // all reviews
+        app.get('/reviews', async (req, res) => {
+            const query = {}
+            const reviews = await reviewsCollection.find(query).toArray();
+            res.send(reviews);
+        })
+
         //-------------------//
+
+
 
         //---- admin api ----//
 
