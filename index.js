@@ -74,7 +74,6 @@ async function run() {
         app.get('/user/:email', verifyToken, async (req, res) => {
             const email = req.params.email
             const query = { email: email }
-            console.log(query);
             const user = await userCollection.find(query).toArray()
             res.send(user)
         })
@@ -178,6 +177,7 @@ async function run() {
             const updatedDoc = {
                 $set: {
                     paid: true,
+                    shipped: false ,
                     transactionId: payment.transactionId
                 }
             }
