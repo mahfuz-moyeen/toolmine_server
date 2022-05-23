@@ -50,7 +50,7 @@ async function run() {
             }
         }
 
-        
+
 
         //---- login api ----//
 
@@ -89,6 +89,13 @@ async function run() {
             }
             const result = await userCollection.updateOne(filter, updateDoc)
             res.send(result)
+        })
+
+        // all user
+        app.get('/users', verifyToken, async (req, res) => {
+            const query = {}
+            const users = await userCollection.find(query).toArray();
+            res.send(users)
         })
 
 
@@ -206,6 +213,25 @@ async function run() {
             const result = await userCollection.updateOne(filter, updateDoc);
             res.send(result);
         })
+
+        //get single admin by email 
+        app.get('/admin/:email', async (req, res) => {
+            const email = req.params.email;
+            const user = await userCollection.findOne({ email: email });
+            const isAdmin = user.role === 'admin';
+            res.send({ admin: isAdmin })
+        })
+
+        //-------ADD productsCollection API---------//
+        app.post('/product', verifyToken, verifyAdmin, async (req, res) => {
+            const product = req.body;
+            const result = await productsCollection.insertOne(product);
+            res.send(result)
+        })
+
+        //------------------//
+
+
 
         //------------------//
 
