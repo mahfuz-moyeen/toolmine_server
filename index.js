@@ -223,6 +223,7 @@ async function run() {
         })
 
         //-------ADD productsCollection API---------//
+
         app.post('/product', verifyToken, verifyAdmin, async (req, res) => {
             const product = req.body;
             const result = await productsCollection.insertOne(product);
@@ -231,7 +232,23 @@ async function run() {
 
         //------------------//
 
+        // get all users orders
+        app.get('/usersOrders', verifyToken, verifyAdmin, async (req, res) => {
+            const query = {}
+            const usersOrders = await ordersCollection.find(query).toArray();
+            res.send(usersOrders);
+        })
 
+        //Shipped  order
+        app.patch('/shipped/:id', verifyToken, verifyAdmin, async (req, res) => {
+            const id = req.params.id
+            const filter = { _id: ObjectId(id) }
+            const updateDoc = {
+                $set: { shipped: true }
+            }
+            const result = await ordersCollection.updateOne(filter, updateDoc)
+            res.send(result)
+        })
 
         //------------------//
 
