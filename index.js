@@ -122,6 +122,15 @@ async function run() {
         })
 
 
+        // single product
+        app.get('/product/:id', async (req, res) => {
+            const id = req.params.id
+            const query = { _id: ObjectId(id) }
+            const product = await productsCollection.findOne(query)
+            res.send(product);
+        })
+
+
         /////---------ORDERS API--------/////
 
         // add orders 
@@ -248,6 +257,14 @@ async function run() {
             }
             const result = await ordersCollection.updateOne(filter, updateDoc)
             res.send(result)
+        })
+
+        // Delete single product
+        app.delete('/product/:id', verifyToken, verifyAdmin, async (req, res) => {
+            const id = req.params.id
+            const query = { _id: ObjectId(id) }
+            const product = await productsCollection.deleteOne(query)
+            res.send(product);
         })
 
         //------------------//
