@@ -39,7 +39,18 @@ async function run() {
         const ordersCollection = client.db("tool_mine").collection("order");
         const paymentCollection = client.db("tool_mine").collection("payment");
 
+        const verifyAdmin = async (req, res, next) => {
+            const requester = req.decoded.email;
+            const requesterAccount = await userCollection.findOne({ email: requester });
+            if (requesterAccount.role === 'admin') {
+                next();
+            }
+            else {
+                res.status(403).send({ message: 'forbidden' });
+            }
+        }
 
+        
 
         //---- login api ----//
 
@@ -185,6 +196,16 @@ async function run() {
 
         //---- admin api ----//
 
+        //make admin
+        app.put('/user/admin/:email', verifyToken, verifyAdmin, async (req, res) => {
+            const email = req.params.email;
+            const filter = { email: email };
+            const updateDoc = {
+                $set: { role: 'admin' },
+            };
+            const result = await userCollection.updateOne(filter, updateDoc);
+            res.send(result);
+        })
 
         //------------------//
 
