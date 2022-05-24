@@ -39,6 +39,7 @@ async function run() {
         const ordersCollection = client.db("tool_mine").collection("order");
         const paymentCollection = client.db("tool_mine").collection("payment");
         const contactCollection = client.db("tool_mine").collection("contact");
+        const subscribeCollection = client.db("tool_mine").collection("subscribe");
 
         const verifyAdmin = async (req, res, next) => {
             const requester = req.decoded.email;
@@ -290,11 +291,21 @@ async function run() {
         //----------------//
 
         //---- Contact us ----//
-
         // post user question or contact 
         app.post('/contact', async (req, res) => {
             const data = req.body;
             const result = await contactCollection.insertOne(data);
+            res.send(result)
+        })
+        
+        //----------------//
+
+        //---- Contact us ----//
+
+        // post user subscribe
+        app.post('/subscribe', async (req, res) => {
+            const subscribe = req.body;
+            const result = await subscribeCollection.insertOne(subscribe);
             res.send(result)
         })
 
