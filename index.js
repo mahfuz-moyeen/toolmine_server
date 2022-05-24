@@ -38,6 +38,7 @@ async function run() {
         const userCollection = client.db("tool_mine").collection("users");
         const ordersCollection = client.db("tool_mine").collection("order");
         const paymentCollection = client.db("tool_mine").collection("payment");
+        const contactCollection = client.db("tool_mine").collection("contact");
 
         const verifyAdmin = async (req, res, next) => {
             const requester = req.decoded.email;
@@ -285,6 +286,17 @@ async function run() {
             });
             res.send({ clientSecret: paymentIntent.client_secret })
         });
+
+        //----------------//
+
+        //---- Contact us ----//
+
+        // post user question or contact 
+        app.post('/contact', async (req, res) => {
+            const data = req.body;
+            const result = await contactCollection.insertOne(data);
+            res.send(result)
+        })
 
         //----------------//
 
