@@ -215,7 +215,7 @@ async function run() {
         //---- admin api ----//
 
         //make admin
-        app.put('/user/admin/:email', verifyToken, verifyAdmin, async (req, res) => {
+        app.patch('/user/admin/:email', verifyToken, verifyAdmin, async (req, res) => {
             const email = req.params.email;
             const filter = { email: email };
             const updateDoc = {
